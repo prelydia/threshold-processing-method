@@ -6,7 +6,11 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ```
+# Source image
+
 ![chain_3](https://github.com/user-attachments/assets/2aacd36f-5d8d-4328-922d-55b605850f3a)
+
+# Identified clusters
 
 ![aaaa](https://github.com/user-attachments/assets/721f69dd-e848-4c5f-9862-6a428df0d239)
 
