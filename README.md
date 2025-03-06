@@ -6,6 +6,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ```
+This program identifies colloidal assemblies by categories: isolated, dimers, chains, and clusters using threshold processing and the OpenCV library.
+
 # Source image
 
 ![chain_3](https://github.com/user-attachments/assets/2aacd36f-5d8d-4328-922d-55b605850f3a)
@@ -13,8 +15,5 @@ GNU General Public License for more details.
 # Identified clusters
 
 ![aaaa](https://github.com/user-attachments/assets/721f69dd-e848-4c5f-9862-6a428df0d239)
-
-
-This program identifies colloidal assemblies by categories: isolated, dimers, chains, and clusters using threshold processing and the OpenCV library.
 
 The work is supported by the grant 22-79-10216 from the Russian Science Foundation https://rscf.ru/en/project/22-79-10216/
