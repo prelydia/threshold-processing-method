@@ -1,0 +1,6 @@
+## Third-Party Licenses
+This project uses:
+- OpenCV (Apache 2.0)
+- SciPy, NumPy, scikit-image (BSD-3-Clause)
+- imutils (MIT)
+- Standart libraries (PSFL).
