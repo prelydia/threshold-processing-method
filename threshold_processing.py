@@ -181,15 +181,15 @@ def define_thresholding_type(labels, gray, default_type):
 
             # https://learnopencv.com/blob-detection-using-opencv-python-c/
 
-            # 
-            # try:
-            #     circulatiry = round((4*math.pi*area)/(perimeter**2)) 
-            #     circularities.append(circulatiry)
-            # except:
-            #     continue
-
-            circulatiry = round((4*math.pi*area)/(perimeter**2)) 
-            circularities.append(circulatiry)
+            # if the default type is chosen incorrectly, the chance of 
+            # identifying noises increases, the area and radius of 
+            # which may be insignificant, which causes an error in 
+            # executing the following lines (we skip such noises)
+            try:
+                circulatiry = round((4*math.pi*area)/(perimeter**2)) 
+                circularities.append(circulatiry)
+            except:
+                continue
 
     # if the particles were identified correctly, we keep the type of threshold value
     # otherwise, change it
