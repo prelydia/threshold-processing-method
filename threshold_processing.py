@@ -15,7 +15,6 @@ image = cv2.imread('path\to\your\image')
 particles_pixels = []
 particle_centers = []
 
-# https://ru.onlinemschool.com/math/library/analytic_geometry/point_point_length/
 def calculate_distance(x1, y1, x2, y2):
     """
     The function finds the distance between two particles
@@ -28,7 +27,6 @@ def calculate_distance(x1, y1, x2, y2):
     """
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-# https://ru.wikipedia.org/wiki/%D0%9F%D0%BB%D0%BE%D1%89%D0%B0%D0%B4%D1%8C_%D0%BA%D1%80%D1%83%D0%B3%D0%B0
 def calculate_radius(area):
     """
     The function finds the radius of the particle
