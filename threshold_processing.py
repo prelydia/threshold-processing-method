@@ -9,7 +9,7 @@ import imutils
 from collections import defaultdict
 
 # Upload image
-image = cv2.imread('C:\\Users\\l.khusainova\\Desktop\\1-s2.0-S0079670011001092-gr302.png') 
+image = cv2.imread('path\to\your\file') 
 
 # Coordinates of all pixels and centroids for each particle
 particles_pixels = []
