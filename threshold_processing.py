@@ -180,7 +180,7 @@ def define_thresholding_type(labels, gray, default_type):
             perimeter = cv2.arcLength(contour, True) # perimeter
 
             # https://learnopencv.com/blob-detection-using-opencv-python-c/
-
+            
             # if the default type is chosen incorrectly, the chance of 
             # identifying noises increases, the area and radius of 
             # which may be insignificant, which causes an error in 
