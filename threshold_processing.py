@@ -9,7 +9,7 @@ import imutils
 from collections import defaultdict
 
 # Upload image
-image = cv2.imread('path\to\your\file') 
+image = cv2.imread('path\\to\\your\\image')
 
 # Coordinates of all pixels and centroids for each particle
 particles_pixels = []
@@ -121,20 +121,24 @@ def watershed_algorithm(image, type):
     Returns identified particles and source image in grayscale
 
     """
+
     # Converting the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Using Gaussian Blur to reduce noise
     blurred = cv2.GaussianBlur(gray, (7, 7), 0)
 
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
+    closed = cv2.morphologyEx(blurred, cv2.MORPH_CLOSE, kernel)
+
     # We apply threshold processing (Otsu's method)
-    _, thresh = cv2.threshold(blurred, 0, 255, type)
+    _, thresh = cv2.threshold(closed, 0, 255, type)
 
     # Calculates the distance to the nearest black pixel (background) for each white pixel
-    dist = ndimage.distance_transform_edt(thresh)
+    dist = cv2.distanceTransform(thresh, cv2.DIST_L2, 0)
 
     # Looks for points on the distance map that are local maxima (centers of objects)
-    coords = peak_local_max(dist, min_distance=15, labels=thresh)
+    coords = peak_local_max(dist, footprint=np.ones((7, 7)), labels=thresh)
 
     # Marker mask
     mask = np.zeros(dist.shape, dtype=bool)
@@ -148,52 +152,40 @@ def watershed_algorithm(image, type):
 
     return labels, gray
 
-def define_thresholding_type(labels, gray, default_type):
+# https://learnopencv.com/blob-detection-using-opencv-python-c/
+def find_mean_circularity(labels, gray):
     """
-    The function for determining the threshold type for the input image
-
-    Returns the threshold type
-
+    The function for determining the mean particles circularity
     """
-    # the threshold types
-    types = [cv2.THRESH_BINARY | cv2.THRESH_OTSU, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU]
-
-    # the index of the current type
-    index = types.index(default_type) if default_type in types else None
-
-    # list for storing the circularities of the found particles
     circularities = []
+
     # for all identified particles
     for label in np.unique(labels):
 
-        if label == 0: continue # ignoring the background
+        if label == 0:  # ignoring the background
+            continue
 
-        # Creating the mask for the current placemark
+        # creating the mask for the current placemark
         mask = np.zeros(gray.shape, dtype="uint8")
         mask[labels == label] = 255
 
-        # Finding the contours
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        for contour in contours:
-            area = cv2.contourArea(contour) # area
-            perimeter = cv2.arcLength(contour, True) # perimeter
+        # detect contours in the mask and grab the largest one
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+        c = max(cnts, key=cv2.contourArea)
 
-            # https://learnopencv.com/blob-detection-using-opencv-python-c/
-            
-            # if the default type is chosen incorrectly, the chance of 
-            # identifying noises increases, the area and radius of 
-            # which may be insignificant, which causes an error in 
-            # executing the following lines (we skip such noises)
-            try:
-                circulatiry = round((4*math.pi*area)/(perimeter**2)) 
-                circularities.append(circulatiry)
-            except:
-                continue
+        # find the area and perimeter of the particle
+        area = cv2.contourArea(c)
+        perimeter = cv2.arcLength(c, True)
 
-    # if the particles were identified correctly, we keep the type of threshold value
-    # otherwise, change it
-    return types[abs(index - 1)] if np.mean(circularities) <= 0.78 else types[index]
+        # if minor noise is detected
+        if (area == 0 or perimeter == 0): continue
+        else:
+            circulatiry = round((4 * math.pi * area)/(perimeter**2)) 
+            circularities.append(circulatiry)
+
+    return np.mean(circularities)
 
 def find_mean_area(labels):
     """
@@ -229,25 +221,31 @@ def find_mean_area(labels):
     # During the search and analysis of various options, it was decided to use a value of 10% of the median of the array as the return parameter.
     return np.median(areas) * 0.1
 
-# In case of an image error
+# in case of an image error
 if image is None:
     raise ValueError("The image has not been uploaded. Check the file path.")
 
-# default threshold type
-default_type = cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+# thresholding types
+types = [cv2.THRESH_BINARY | cv2.THRESH_OTSU, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU]
 
-# identifying the particles in the image
-labels, gray = watershed_algorithm(image, default_type)
+# to store the circularity values for each type
+mean_circularities = defaultdict(list)
+for type in types:
 
-# find the threshold type
-type = define_thresholding_type(labels, gray, default_type)
-
-print(f'выбранный тип порогового преобразования: {type}')
-
-# if the threshold type was initially selected incorrectly
-if (type != default_type):  
-    # then change the type and find new particles
     labels, gray = watershed_algorithm(image, type)
+
+    value = find_mean_circularity(labels, gray)
+
+    mean_circularities[type].append(value)
+
+# find the maximum value of circularity
+max_circularity = max(mean_circularities.values())
+
+# determine which type corresponds to the maximum circularity value
+key_max_circularity = next(key for key, value in mean_circularities.items() if value == max_circularity)
+
+# find the final particles
+labels, gray = watershed_algorithm(image, key_max_circularity)
 
 # get threshold area parameter
 mean_area = find_mean_area(labels)
@@ -341,5 +339,3 @@ for i, value in enumerate(['isolated', 'chain', 'dimer', 'cluster']):
 
 cv2.imshow("result", image)
 cv2.waitKey(0)
-
-
